@@ -1,0 +1,14 @@
+let's try to launch the program :
+
+level7@RainFall:~$ ./level7
+Segmentation fault (core dumped)
+level7@RainFall:~$ ./level7 a
+Segmentation fault (core dumped)
+level7@RainFall:~$ ./level7 a
+Segmentation fault (core dumped)
+level7@RainFall:~$ ./level7 a a
+~~
+
+so the program take to argument and make some thing with 
+so let's try to decompile the software
+

