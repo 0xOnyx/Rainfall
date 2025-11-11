@@ -1,0 +1,26 @@
+let's start to exec the sowftware :
+./level9
+
+is make nothing 
+
+so let's deep dive inside the disassemble 
+
+
+push    ebp
+mov     ebp, esp
+push    ebx
+and     esp, 0FFFFFFF0h
+sub     esp, 20h
+cmp     [ebp+argc], 1
+jg      short loc_8048610
+
+
+is look that so the programm need one argument to exec 
+
+
+so let's try with one argument :
+./level9 a 
+
+but make nothing too
+
+so let's try to decompile the software to look what is make

