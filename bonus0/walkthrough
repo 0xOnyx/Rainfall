@@ -1,0 +1,228 @@
+so let's try to launch the first bonus0
+
+└─$ ./bonus0                     
+ - 
+a
+ - 
+a
+a a
+
+
+so is take two element from the stdin and make in concatenation of the two string
+
+
+so let's decmpile the function and watch wats is inside :
+
+inside you have two function 
+
+P and PP
+
+so inside the main is juste call the pp 
+
+
+push    ebp
+mov     ebp, esp
+and     esp, 4294967280
+sub     esp, 64
+lea     eax, [esp+22]
+mov     [esp], eax      ; dest
+call    pp
+lea     eax, [esp+22]
+mov     [esp], eax      ; s
+call    _puts
+mov     eax, 0
+leave
+retn
+
+is make a stack of 64 octet 
+and create  a buffer of 64 - 22 = 42 octet 
+
+after is put the buffer to the first argument of the function pp
+
+and call function pp 
+
+after call function pp is get the buffer at esp+22 and call puts
+
+
+
+
+let's show wat's the function pp 
+public pp
+pp proc near
+
+var_3C= dword ptr -3Ch
+src= byte ptr -30h
+var_1C= byte ptr -1Ch
+dest= dword ptr  8
+
+; __unwind {
+push    ebp
+mov     ebp, esp
+push    edi
+push    ebx
+sub     esp, 50h
+
+is create a stack of 80 octet 
+
+
+after is call two time the function p with twot argument
+the first argument is a pointer to string " - " 
+the second arugment is a pointer to the buffer of size 28 - 48  = 20
+
+
+mov     dword ptr [esp+4], offset s ; " - "
+lea     eax, [ebp-48]
+mov     [esp], eax      ; dest
+call    p
+
+
+first argument is the same of the last
+the second arugment is the size 28 
+
+mov     dword ptr [esp+4], offset s ; " - "
+lea     eax, [ebp-28]
+mov     [esp], eax      ; dest
+call    p
+
+
+
+after is make a copy of the buffer of the frist call of p and 
+put the restulat inside the buffer of argument of the function 
+so is buffer in the main stack so the buffer of the 
+dest is 42 octet and the src is 20 octet
+
+lea     eax, [ebp-48]
+mov     [esp+4], eax    ; src
+mov     eax, [ebp+8]
+mov     [esp], eax      ; dest
+call    _strcpy
+
+
+
+
+
+mov     ebx, offset unk_80486A4
+mov     eax, [ebp+8]          ; eax = make the start of the buffer here is the main buffer of 42 octet
+mov     dword ptr [ebp-60], 0FFFFFFFFh
+mov     edx, eax              ; edx = buf put the buffer inside edx
+mov     eax, 0                ; AL = 0 -> find the first instance of \0
+mov     ecx, [ebp-60]         ; ecx = 0xFFFFFFFF init  compte
+mov     edi, edx              ; edi = buffer start position
+repne scasb
+
+
+repne scasb get octet by octet from  EDI,
+ decrement ECX each iteration, 
+ and stop when AL (== '\0') other when ECX is 0.
+
+after :
+EDI is point to  '\0' (buf + len + 1),
+
+ECX as the value after the decreemntation
+
+
+mov     eax, ecx
+not     eax
+sub     eax, 1
+add     eax, [ebp+8]
+movzx   edx, word ptr [ebx]
+mov     [eax], dx
+
+is get the value of the len
+not eax → eax = ~ECX_final
+sub eax, 1 → eax = ~ECX_final - 1
+
+add     eax, [ebp+8]
+eax = buf + len
+
+read 2 octet and write 2octet inside the addr 
+
+
+  *(_WORD *)&dest[strlen(dest)] = '\0';
+
+so is call strct with thwo argument src and dest
+the first argument is the buffer ins the stack of main of 42octet
+the second argument is the the second call of p and the buffer is 28 octet
+
+
+lea     eax, [ebp-28]
+mov     [esp+4], eax    ; src
+mov     eax, [ebp+8]
+mov     [esp], eax      ; dest
+call    _strcat
+
+actually i have big security issue here because 28 + 20 = 48 octet of p get from stdin
+but the buffer inside the stack is only of 42 octet !! so i write more than 6 octet ! i think is exploitatiobn here
+
+
+and for finish is juste the prolog to reset the value of the register
+add     esp, 80
+pop     ebx
+pop     edi
+pop     ebp
+retn
+; } // starts at 804851E
+pp endp
+
+
+
+
+
+
+
+
+
+
+function P
+p juste get  buffer from the stdin and 
+let's watch wat's is inside 
+
+public p
+p proc near
+
+buf= byte ptr -1008h
+dest= dword ptr  8
+s= dword ptr  0Ch
+
+; __unwind {
+push    ebp
+mov     ebp, esp
+sub     esp, 4120
+mov     eax, [ebp+s]
+mov     [esp], eax      ; s
+call    _puts
+mov     dword ptr [esp+8], 4096 ; nbytes
+lea     eax, [ebp+buf]
+mov     [esp+4], eax    ; buf
+mov     dword ptr [esp], 0 ; fd
+call    _read
+mov     dword ptr [esp+4], 10 ; c
+lea     eax, [ebp+buf]
+mov     [esp], eax      ; s
+call    _strchr
+mov     byte ptr [eax], 0
+lea     eax, [ebp+buf]
+mov     dword ptr [esp+8], 14h ; n
+mov     [esp+4], eax    ; src
+mov     eax, [ebp+dest]
+mov     [esp], eax      ; dest
+call    _strncpy
+leave
+retn
+; } // starts at 80484B4
+p end
+
+
+i juste get from stdin 4096 element and get the \n and replace with 0 after is copy 20 element from the buffer in parameter
+and put inside the dest 
+
+
+char *__cdecl p(char *dest, char *s)
+{
+  char buf[4104]; // [esp+10h] [ebp-1008h] BYREF
+
+  puts(s);
+  read(0, buf, 0x1000u);
+  *strchr(buf, 10) = 0;
+  return strncpy(dest, buf, 20u);
+}
