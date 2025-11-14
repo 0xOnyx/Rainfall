@@ -13,8 +13,8 @@ context.log_level = 'info'  # Niveau de log (debug, info, warning, error)
 LOCAL = False  # Mettre à False pour l'exploitation SSH
 HOST = "localhost"  # Hôte pour SSH
 PORT = 8881  # Port pour SSH
-USER = "bonus1"  # Nom d'utilisateur SSH
-PASSWORD = "cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9"  # Mot de passe SSH
+USER = "bonus2"  # Nom d'utilisateur SSH
+PASSWORD = "579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245"  # Mot de passe SSH
 SSH_SESSION = None
 
 
