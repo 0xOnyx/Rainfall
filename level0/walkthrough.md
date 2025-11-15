@@ -35,8 +35,8 @@ $ python3 -c "print(int('0x1a7', 16))"
 ### Trigger the Success Path
 ```bash
 $ ./level0 423
-Good... wait what?
-$ id
+$ whoami
+level1
 ```
 Once the program spawns a shell (running as `level1`), we can read the next password.
 
