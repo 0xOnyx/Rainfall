@@ -1,7 +1,9 @@
 # Level 0 Walkthrough
 
 ## 1. Program Analysis
-The binary takes a single command-line argument, converts it with `atoi`, and compares the result against `0x1a7` (`423` decimal). Matching the comparison keeps the execution inside the “win” path, which eventually reaches `system("/bin/sh")`.
+The binary takes a single command-line argument, converts it with `atoi`, and compares the result against `0x1a7` (`423`
+decimal). Matching the comparison keeps the execution inside the “win” path, which eventually reaches
+`execv("/bin/sh", &command)`.
 
 ### Decompilation with GDB
 ```bash
@@ -17,12 +19,14 @@ $ gdb ./level0
 0x8048ed9 <main+25>:    cmp    eax, 0x1a7              ; 0x1a7 == 423
 0x8048ede <main+30>:    jne    0x8048f58 <main+152>    ; jump away on mismatch
 ```
-If the comparison succeeds, execution flows through several calls (format string, banner, `system("/bin/sh")`). Otherwise the jump discards us.
+If the comparison succeeds, execution flows through several calls (format string, banner, `system("/bin/sh")`).
+Otherwise, the jump discards us.
 
 ## 2. Vulnerability Analysis
 1. No validation is performed on the integer except the equality check.
-2. `atoi` accepts decimal strings only; any other base will fail the comparison.
-3. Providing `423` makes `cmp` succeed, so the `jne` is not taken and we stay on the privileged branch.
+2. `atoi` parses decimal strings (ignoring leading whitespace and signs); hexadecimal or octal prefixes will cause it to
+return 0.
+3. Providing `423` makes `cmp` succeed, so the `jne` is not taken, and we stay on the privileged branch.
 
 ## 3. Exploitation
 
@@ -35,8 +39,8 @@ $ python3 -c "print(int('0x1a7', 16))"
 ### Trigger the Success Path
 ```bash
 $ ./level0 423
-Good... wait what?
-$ id
+$ whoami
+level1
 ```
 Once the program spawns a shell (running as `level1`), we can read the next password.
 

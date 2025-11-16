@@ -1,7 +1,7 @@
 # Bonus 2 Walkthrough
 
 ## Main Function
-```asm
+```c
 char dest[76];
 memset(dest, 0, sizeof(dest));
 strncpy(dest, argv[1], 40);
@@ -22,9 +22,11 @@ It copies the greeting into a 72-byte stack buffer and then performs `strcat(buf
 - `argv[1]` with exactly 40 bytes,
 - `argv[2]` with at least 32 bytes,
 
-then `dest` becomes two back-to-back strings with no null terminator between them. When `strcat` runs inside `greetuser`, it keeps reading until it finds a `\0`, effectively appending 72+ bytes to a 72-byte array—stack overflow.
+then `dest` becomes two back-to-back strings with no null terminator between them. When `strcat` runs inside
+`greetuser`, it keeps reading until it finds a `\0`, effectively appending 72+ bytes to a 72-byte array—stack overflow.
 
-GDB cyclic analysis shows EIP control after 23 bytes beyond the end of the greeting. Setting `LANG=nl` (13-byte greeting) makes the offset stable.
+GDB cyclic analysis shows EIP control after 23 bytes beyond the end of the greeting. Setting `LANG=nl`
+(13-byte greeting) makes the offset stable.
 
 ## Exploit Plan
 1. `export LANG=nl`.
@@ -44,4 +46,5 @@ $ cat /home/user/bonus3/.pass
 
 ## Notes
 - The offset (19 bytes) may vary slightly; verify with `pattern create/search`.
-- The same technique works with any greeting; `LANG=nl` simply provides the most consistent layout.
+- Note: Only fi/nl enable the exploit due to their long greetings (18-19 bytes). Shorter greetings don't allow the
+40-byte username to reach the return address.

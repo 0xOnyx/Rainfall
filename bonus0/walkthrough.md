@@ -25,8 +25,10 @@ return strncpy(dest, buf, 20);
 
 ## Vulnerability
 - The destination buffer in `main` is only `64 - 22 = 42` bytes (because `pp` receives `esp+22`).
-- `pp` concatenates up to `20 (first chunk) + 2 (" - ") + 20 (second chunk)` = 42 bytes, but if the first chunk is exactly 20 bytes, it lacks a trailing `\0`, so `strcat` continues reading into the second chunk and beyond.
-- Result: stack buffer overflow that overwrites saved EIP after ~48 bytes. GEF’s `pattern create/search` shows control is gained after the second chunk plus 9 bytes.
+- `pp` concatenates up to `20 (first chunk) + 2 (" - ") + 20 (second chunk)` = 42 bytes, but if the first chunk is
+exactly 20 bytes, it lacks a trailing `\0`, so `strcat` continues reading into the second chunk and beyond.
+- Result: stack buffer overflow that overwrites saved EIP after ~48 bytes. GEF’s `pattern create/search` shows control
+is gained after the second chunk plus 9 bytes.
 
 ## Exploit
 1. Place shellcode in an environment variable (stack is executable):
@@ -51,5 +53,5 @@ return strncpy(dest, buf, 20);
 ## Flag
 ```bash
 $ cat /home/user/bonus1/.pass
-579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
+cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9
 ```

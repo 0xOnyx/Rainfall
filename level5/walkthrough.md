@@ -1,5 +1,15 @@
 # Level 5 Walkthrough
 
+## Binary overview
+
+This binary is vulnerable to a format string attack. The `n` function passes user input directly to `printf` as a format
+string instead of as plain text. This allows us to write to arbitrary memory locations. Additionally, there is a
+function called `o` which is never called, but it spawns a shell. Since `level5` is a SUID binary owned by `level6`, the
+resulting shell will run with the permissions of `level6`, allowing us to read their password. At the end of the `n`
+function, there is a call to `exit`, a libc function. We will use a format string attack to overwrite the address of the
+`exit` function in the Global Offset Table (GOT) with the address of the `o` function. As a result, when the program
+calls `exit`, it will actually call the `o` function, spawning a shell.
+
 ## Code Review
 `n()` is the only function invoked by `main`:
 ```asm

@@ -22,16 +22,20 @@ gef➤ x/10i $eip
 0x8048490 <main+16>: call   gets@plt            ; unbounded read
 ```
 Observations:
-- The usable buffer size is `0x50 - 0x10 = 0x40` (64 bytes).
-- Because `gets` never checks bounds, anything beyond 64 bytes begins to smash saved registers.
+- The source code declares a 76-byte buffer. The assembly shows `0x50 - 0x10 = 0x40` (64 bytes). This difference could be
+probably due to compiler optimizations and stack alignment. The empirical offset (76 bytes) is what matters for
+exploitation.
+- Because `gets` never checks bounds, anything beyond 76 bytes overwrites the saved EIP.
 
 ## Exploitation Process
 
 ### 1. Measure the Offset
-Use `pattern create 200` (GEF) or `pwntools.cyclic` and crash the program. `pattern search $eip` reports that EIP is overwritten after 76 bytes, confirming the theoretical calculation (64 bytes buffer + saved EBP + alignment).
+Using `pattern create 200` and `pattern search $eip` confirms the offset to EIP is exactly **76 bytes**, matching the
+buffer size declared in `source.c`.
 
 ### 2. Identify the Win Function
-A quick `info functions` shows an extra symbol `run` at `0x8048444`. Disassembly:
+`info functions` reveals the `run()` function at `0x8048444`. It spawns a shell via `system("/bin/sh")`, making it the
+ideal target to jump to. Disassembly:
 ```asm
 run:
   push   ebp
@@ -42,7 +46,6 @@ run:
   leave
   ret
 ```
-Jumping there is ideal because it already spawns a shell.
 
 ### 3. Craft the Payload
 ```
